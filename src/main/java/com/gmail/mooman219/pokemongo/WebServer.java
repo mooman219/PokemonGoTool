@@ -1,6 +1,6 @@
 package com.gmail.mooman219.pokemongo;
 
-import com.gmail.mooman219.pokemongo.net.AuthentcationHandler;
+import com.gmail.mooman219.pokemongo.handler.AuthentcationHandler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.ext.web.Router;
@@ -15,13 +15,15 @@ public class WebServer {
     /**
      * The port the web server will run on.
      */
-    private final int port;
+    public final int port;
     /**
      * The base address of the web server.
      */
-    private final String address;
-
-    private final AuthentcationHandler authenticationHandler;
+    public final String address;
+    /**
+     * The authentication handler for the server.
+     */
+    public final AuthentcationHandler authenticationHandler;
 
     /**
      * Creates a new WebServer.
@@ -35,28 +37,6 @@ public class WebServer {
     }
 
     /**
-     * Gets the port the server is running on.
-     *
-     * @return the port the server is running on.
-     */
-    public int getPort() {
-        return port;
-    }
-
-    /**
-     * Gets the address the server is running on.
-     *
-     * @return the address the server is running on.
-     */
-    public String getAddress() {
-        return address;
-    }
-
-    public AuthentcationHandler getAuthenticationHandler() {
-        return authenticationHandler;
-    }
-
-    /**
      * Starts the WebServer.
      */
     public void start() {
@@ -64,7 +44,7 @@ public class WebServer {
         HttpServer server = vertx.createHttpServer();
         Router router = Router.router(vertx);
 
-        router.route(this.authenticationHandler.getRoute()).handler(this.authenticationHandler);
+        this.authenticationHandler.register(router);
 
         server.requestHandler(router::accept).listen(this.port);
     }

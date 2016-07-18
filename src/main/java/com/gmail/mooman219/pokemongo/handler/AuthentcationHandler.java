@@ -1,8 +1,7 @@
-package com.gmail.mooman219.pokemongo.net;
+package com.gmail.mooman219.pokemongo.handler;
 
 import com.gmail.mooman219.pokemongo.UserToken;
 import com.gmail.mooman219.pokemongo.WebServer;
-import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
@@ -11,17 +10,7 @@ import io.vertx.ext.web.RoutingContext;
 /**
  * @author Joseph Cumbo (mooman219)
  */
-public class AuthentcationHandler implements Handler<RoutingContext> {
-
-    /**
-     * The fully qualified address with the route included.
-     */
-    private final String address;
-
-    /**
-     * The route this handler lives.
-     */
-    private final String route;
+public class AuthentcationHandler extends RouteHandler {
 
     /**
      * The last successful authorization made, null if one hasn't been made yet.
@@ -35,26 +24,7 @@ public class AuthentcationHandler implements Handler<RoutingContext> {
      * @param route the route this handler lives.
      */
     public AuthentcationHandler(String address, String route) {
-        this.address = address + route;
-        this.route = route;
-    }
-
-    /**
-     * Gets the fully qualified address with the route included.
-     *
-     * @return the fully qualified address with the route included.
-     */
-    public String getAddress() {
-        return address;
-    }
-
-    /**
-     * Gets the route this handler lives.
-     *
-     * @return the route this handler lives.
-     */
-    public String getRoute() {
-        return route;
+        super(address, route);
     }
 
     /**
@@ -111,5 +81,4 @@ public class AuthentcationHandler implements Handler<RoutingContext> {
             res.end();
         }
     }
-
 }

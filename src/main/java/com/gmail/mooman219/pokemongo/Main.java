@@ -11,7 +11,7 @@ public class Main {
     public static void main(String[] args) {
         WebServer server = new WebServer(8891);
         server.start();
-        openWebpage(server.getAuthenticationHandler().getAddress());
+        openWebpage(server.authenticationHandler.address);
     }
 
     /**
