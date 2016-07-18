@@ -23,28 +23,6 @@ public class WebServer {
      * The internal route that handles authentication.
      */
     public static final String DIR_AUTH = "/auth";
-    /**
-     * Niantic client ID.
-     */
-    public static final String CLIENT_ID = "848232511240-73ri3t7plvk96pj4f85uj8otdat2alem.apps.googleusercontent.com";
-    /**
-     * Niantic client secret.
-     */
-    public static final String CLIENT_SECRET = "NCjF1TLi2CcY6t5mt0ZveuL7";
-    /**
-     * Google authentication URL for getting the code. The GET query parameters
-     * are pre-populated as they're constant. The {@code redirect_uri} routes to
-     * {@code DIR_AUTH_CODE}.
-     */
-    public static final String URL_GOOGLE_CODE = "https://accounts.google.com/o/oauth2/auth?"
-            + "client_id=" + CLIENT_ID
-            + "&redirect_uri=" + encode(URL_BASE + DIR_AUTH)
-            + "&response_type=code"
-            + "&scope=openid%20email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email";
-    /**
-     * Google authentication URL for getting the token.
-     */
-    public static final String URL_GOOGLE_TOKEN = "https://accounts.google.com/o/oauth2/token";
 
     public void start() {
         Vertx vertx = Vertx.vertx();
@@ -67,7 +45,7 @@ public class WebServer {
                 res.end("Token: " + auth == null ? "Failed" : auth.toString());
             } else {
                 res.setStatusCode(302);
-                res.putHeader("Location", URL_GOOGLE_CODE);
+                res.putHeader("Location", Authorization.URL_GOOGLE_CODE);
                 res.end();
             }
         });
