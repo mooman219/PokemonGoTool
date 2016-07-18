@@ -1,9 +1,6 @@
 package com.gmail.mooman219.pokemongo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import static com.gmail.mooman219.pokemongo.WebServer.DIR_AUTH;
-import static com.gmail.mooman219.pokemongo.WebServer.URL_BASE;
-import static com.gmail.mooman219.pokemongo.WebServer.encode;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.URL;
@@ -31,7 +28,7 @@ public class Authorization {
      */
     public static final String URL_GOOGLE_CODE = "https://accounts.google.com/o/oauth2/auth?"
             + "client_id=" + CLIENT_ID
-            + "&redirect_uri=" + encode(URL_BASE + DIR_AUTH)
+            + "&redirect_uri=" + WebServer.encode(WebServer.URL_BASE + WebServer.DIR_AUTH)
             + "&response_type=code"
             + "&scope=openid%20email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email";
     /**
@@ -68,11 +65,16 @@ public class Authorization {
     /**
      * Represents an authorization response from Google.
      *
-     * @param accessToken
-     * @param tokenType
-     * @param expiresIn
-     * @param idToken
-     * @param refreshToken
+     * @param accessToken the token that can be sent to a Google API.
+     * @param tokenType identifies the type of token returned. Currently, this
+     * field always has the value Bearer.
+     * @param expiresIn the remaining lifetime of the access token.
+     * @param idToken a JWT that contains identity information about the user
+     * that is digitally signed by Google. If your request included an identity
+     * scope such as openid, profile, or email.
+     * @param refreshToken a token that may be used to obtain a new access
+     * token, included by default for installed applications. Refresh tokens are
+     * valid until the user revokes access.
      */
     public Authorization(String accessToken, String tokenType, int expiresIn, String idToken, String refreshToken) {
         this.accessToken = accessToken;
@@ -94,7 +96,6 @@ public class Authorization {
      *
      * @return an Authorization upon success, null if there was an issue with
      * the code.
-     * @throws IOException
      */
     public Authorization refresh() {
         byte[] payload = ("grant_type=authorization_code"
@@ -121,7 +122,6 @@ public class Authorization {
      * @param code the one time use code used to create an authorization.
      * @return an Authorization upon success, null if there was an issue with
      * the code.
-     * @throws IOException
      */
     public static Authorization createAutorization(String code) {
         byte[] payload = ("grant_type=authorization_code"

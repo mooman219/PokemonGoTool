@@ -24,6 +24,12 @@ public class WebServer {
      */
     public static final String DIR_AUTH = "/auth";
 
+    private Authorization lastAuth = null;
+
+    public Authorization getAuthorization() {
+        return lastAuth;
+    }
+
     public void start() {
         Vertx vertx = Vertx.vertx();
         HttpServer server = vertx.createHttpServer();
@@ -41,8 +47,13 @@ public class WebServer {
                 res.end("Post Received");
             } else if (req.params().contains("code")) {
                 Authorization auth = Authorization.createAutorization(req.params().get("code"));
-                res.putHeader("content-type", "text/plain");
-                res.end("Token: " + auth == null ? "Failed" : auth.toString());
+                    res.putHeader("content-type", "text/html");
+                if (auth != null) {
+                    this.lastAuth = auth;
+                    res.end("<b>Success</b>, authenticated with the server.\nYou may close this window now.");
+                } else {
+                    res.end("<b>Error</b>, unable to authenticate with the server. <a href=" + URL_BASE + DIR_AUTH + ">Click here to try again.</a>");
+                }
             } else {
                 res.setStatusCode(302);
                 res.putHeader("Location", Authorization.URL_GOOGLE_CODE);
