@@ -53,8 +53,8 @@ public class Main {
             @Override
             public Object execute(Req req, Resp resp) throws Exception {
                 if (req.data().containsKey("code")) {
-                    String code = (String) req.data().get("code");
-                    return "Result: " + Authorization.CreateAutorization(code).toString();
+                    Authorization auth = Authorization.createAutorization((String) req.data().get("code"));
+                    return auth.toString();
                 } else {
                     resp.redirect(URL_GOOGLE_CODE);
                     return "";

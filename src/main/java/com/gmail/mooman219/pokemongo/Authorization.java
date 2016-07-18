@@ -1,11 +1,11 @@
 package com.gmail.mooman219.pokemongo;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 
 /**
@@ -48,12 +48,7 @@ public class Authorization {
      * @param idToken
      * @param refreshToken
      */
-    public Authorization(
-            @JsonProperty("access_token") String accessToken,
-            @JsonProperty("token_type") String tokenType,
-            @JsonProperty("expires_in") int expiresIn,
-            @JsonProperty("id_token") String idToken,
-            @JsonProperty("refresh_token") String refreshToken) {
+    public Authorization(String accessToken, String tokenType, int expiresIn, String idToken, String refreshToken) {
         this.accessToken = accessToken;
         this.tokenType = tokenType;
         this.expiresIn = expiresIn;
@@ -67,6 +62,34 @@ public class Authorization {
     }
 
     /**
+     * Creates a new Authorization from the refresh token of the current
+     * Authorization. This performs a http request to the authentication
+     * endpoint.
+     *
+     * @return an Authorization upon success, null if there was an issue with
+     * the code.
+     * @throws IOException
+     */
+    public Authorization refresh() throws IOException {
+        byte[] payload = ("grant_type=authorization_code"
+                + "&refresh_token=" + this.refreshToken
+                + "&client_id=" + Main.CLIENT_ID
+                + "&client_secret=" + Main.CLIENT_SECRET).getBytes(StandardCharsets.UTF_8);
+
+        Map<String, Object> res = queryAuthenticationApi(payload);
+        if (res == null) {
+            return null;
+        }
+
+        return new Authorization(
+                (String) res.get("access_token"),
+                (String) res.get("token_type"),
+                (int) res.get("expires_in"),
+                (String) res.get("id_token"),
+                this.refreshToken);
+    }
+
+    /**
      * Creates a new authorization from the given code.
      *
      * @param code the one time use code used to create an authorization.
@@ -74,13 +97,34 @@ public class Authorization {
      * the code.
      * @throws IOException
      */
-    public static Authorization CreateAutorization(String code) throws IOException {
+    public static Authorization createAutorization(String code) throws IOException {
         byte[] payload = ("grant_type=authorization_code"
                 + "&code=" + code
                 + "&client_id=" + Main.CLIENT_ID
                 + "&client_secret=" + Main.CLIENT_SECRET
                 + "&redirect_uri=" + Main.URL_BASE + Main.DIR_AUTH).getBytes(StandardCharsets.UTF_8);
 
+        Map<String, Object> res = queryAuthenticationApi(payload);
+        if (res == null) {
+            return null;
+        }
+
+        return new Authorization(
+                (String) res.get("access_token"),
+                (String) res.get("token_type"),
+                (int) res.get("expires_in"),
+                (String) res.get("id_token"),
+                (String) res.get("refresh_token"));
+    }
+
+    /**
+     * Queries the authentication endpoint with the payload.
+     *
+     * @param payload the post data to send to the authentication endpoint.
+     * @return the mapped json response.
+     * @throws IOException
+     */
+    private static Map<String, Object> queryAuthenticationApi(byte[] payload) throws IOException {
         URL myurl = new URL(Main.URL_GOOGLE_TOKEN);
         HttpsURLConnection con = (HttpsURLConnection) myurl.openConnection();
         con.setRequestMethod("POST");
@@ -93,13 +137,11 @@ public class Authorization {
             output.write(payload);
         }
 
-        System.out.println(con.getResponseCode());
-        System.out.println(con.getResponseMessage());
         if (con.getResponseCode() != 200) {
             return null;
         }
 
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(con.getInputStream(), Authorization.class);
+        return mapper.readValue(con.getInputStream(), Map.class);
     }
 }
