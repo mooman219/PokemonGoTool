@@ -98,6 +98,7 @@ public class UserToken {
 
         Map<String, Object> res = queryUserTokenApi(payload);
         if (res == null) {
+            System.out.println("Error: Null UserToken response");
             return null;
         }
 
@@ -126,6 +127,7 @@ public class UserToken {
 
         Map<String, Object> res = queryUserTokenApi(payload);
         if (res == null) {
+            System.out.println("Error: Null UserToken response");
             return null;
         }
 
@@ -159,13 +161,17 @@ public class UserToken {
             }
 
             if (con.getResponseCode() != 200) {
+                System.out.println("Error: Non 200 status code on UserToken\n"
+                        + "Response: " + con.getResponseCode() + " " + con.getResponseMessage() + "\n"
+                        + "Payload: " + new String(payload, StandardCharsets.UTF_8));
                 return null;
             }
 
             ObjectMapper mapper = new ObjectMapper();
             return mapper.readValue(con.getInputStream(), Map.class);
         } catch (IOException ex) {
-            System.out.println("Error, unable to create authorization: " + ex.getMessage());
+            System.out.println("Error: Unable to create authorization\n"
+                    + "Stack trace:");
             ex.printStackTrace();
         }
         return null;
