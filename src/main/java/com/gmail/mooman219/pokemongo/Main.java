@@ -8,17 +8,22 @@ import java.net.URI;
  */
 public class Main {
 
-
     public static void main(String[] args) {
         new WebServer().start();
         openWebpage(WebServer.URL_BASE + WebServer.DIR_AUTH);
     }
 
-    public static void openWebpage(String uri) {
+    /**
+     * Attempts to open a web page on the platform this is being run on. This
+     * does nothing if it isn't supported on the current platform.
+     *
+     * @param url the url to open.
+     */
+    public static void openWebpage(String url) {
         Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
         if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
             try {
-                desktop.browse(URI.create(uri));
+                desktop.browse(URI.create(url));
             } catch (Exception e) {
                 e.printStackTrace();
             }

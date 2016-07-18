@@ -23,13 +23,25 @@ public class WebServer {
      * The internal route that handles authentication.
      */
     public static final String DIR_AUTH = "/auth";
-
+    /**
+     * The last successful authorization made, null if one hasn't been made yet.
+     */
     private Authorization lastAuth = null;
 
+    /**
+     * Gets the last successful authorization made on the web server. This may
+     * be null if a successful authorization hasn't been made yet.
+     *
+     * @return the last successful authorization made, null if one hasn't been
+     * made yet.
+     */
     public Authorization getAuthorization() {
         return lastAuth;
     }
 
+    /**
+     * Starts the WebServer, listening on the default port.
+     */
     public void start() {
         Vertx vertx = Vertx.vertx();
         HttpServer server = vertx.createHttpServer();
@@ -41,13 +53,14 @@ public class WebServer {
             if (req.method() == HttpMethod.POST) {
                 /**
                  * When the token request is made, the redirect-uri needs to be
-                 * valid or else Google will respond with a 400.
+                 * valid or else Google will respond with a 400. Therefore, we
+                 * handle the post case differently.
                  */
                 res.putHeader("content-type", "text/plain");
                 res.end("Post Received");
             } else if (req.params().contains("code")) {
                 Authorization auth = Authorization.createAutorization(req.params().get("code"));
-                    res.putHeader("content-type", "text/html");
+                res.putHeader("content-type", "text/html");
                 if (auth != null) {
                     this.lastAuth = auth;
                     res.end("<b>Success</b>, authenticated with the server.\nYou may close this window now.");
