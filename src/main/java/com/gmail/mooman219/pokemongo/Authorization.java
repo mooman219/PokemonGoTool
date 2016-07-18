@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.net.ssl.HttpsURLConnection;
 
 /**
@@ -70,11 +72,11 @@ public class Authorization {
      * the code.
      * @throws IOException
      */
-    public Authorization refresh() throws IOException {
+    public Authorization refresh() {
         byte[] payload = ("grant_type=authorization_code"
                 + "&refresh_token=" + this.refreshToken
-                + "&client_id=" + Main.CLIENT_ID
-                + "&client_secret=" + Main.CLIENT_SECRET).getBytes(StandardCharsets.UTF_8);
+                + "&client_id=" + WebServer.CLIENT_ID
+                + "&client_secret=" + WebServer.CLIENT_SECRET).getBytes(StandardCharsets.UTF_8);
 
         Map<String, Object> res = queryAuthenticationApi(payload);
         if (res == null) {
@@ -97,12 +99,12 @@ public class Authorization {
      * the code.
      * @throws IOException
      */
-    public static Authorization createAutorization(String code) throws IOException {
+    public static Authorization createAutorization(String code) {
         byte[] payload = ("grant_type=authorization_code"
                 + "&code=" + code
-                + "&client_id=" + Main.CLIENT_ID
-                + "&client_secret=" + Main.CLIENT_SECRET
-                + "&redirect_uri=" + Main.URL_BASE + Main.DIR_AUTH).getBytes(StandardCharsets.UTF_8);
+                + "&client_id=" + WebServer.CLIENT_ID
+                + "&client_secret=" + WebServer.CLIENT_SECRET
+                + "&redirect_uri=" + WebServer.URL_BASE + WebServer.DIR_AUTH).getBytes(StandardCharsets.UTF_8);
 
         Map<String, Object> res = queryAuthenticationApi(payload);
         if (res == null) {
@@ -124,24 +126,30 @@ public class Authorization {
      * @return the mapped json response.
      * @throws IOException
      */
-    private static Map<String, Object> queryAuthenticationApi(byte[] payload) throws IOException {
-        URL url = new URL(Main.URL_GOOGLE_TOKEN);
-        HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
-        con.setRequestMethod("POST");
-        con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-        con.setRequestProperty("Content-Length", payload.length + "");
-        con.setDoOutput(true);
-        con.setDoInput(true);
+    private static Map<String, Object> queryAuthenticationApi(byte[] payload) {
+        try {
+            URL url = new URL(WebServer.URL_GOOGLE_TOKEN);
+            HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+            con.setRequestProperty("Content-Length", payload.length + "");
+            con.setDoOutput(true);
+            con.setDoInput(true);
 
-        try (DataOutputStream output = new DataOutputStream(con.getOutputStream());) {
-            output.write(payload);
+            try (DataOutputStream output = new DataOutputStream(con.getOutputStream());) {
+                output.write(payload);
+            }
+
+            if (con.getResponseCode() != 200) {
+                return null;
+            }
+
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(con.getInputStream(), Map.class);
+        } catch (IOException ex) {
+            System.out.println("Error, unable to create authorization: " + ex.getMessage());
+            ex.printStackTrace();
         }
-
-        if (con.getResponseCode() != 200) {
-            return null;
-        }
-
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(con.getInputStream(), Map.class);
+        return null;
     }
 }

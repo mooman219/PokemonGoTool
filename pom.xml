@@ -13,9 +13,9 @@
     
     <dependencies>
         <dependency>
-            <groupId>org.rapidoid</groupId>
-            <artifactId>rapidoid-quick</artifactId>
-            <version>5.1.9</version>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-web</artifactId>
+            <version>3.3.2</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
