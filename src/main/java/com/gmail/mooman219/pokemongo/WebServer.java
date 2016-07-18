@@ -118,7 +118,7 @@ public class WebServer {
              * code needed for the UserToken.
              */
             res.setStatusCode(302);
-            res.putHeader("Location", UserToken.URL_GOOGLE_CODE
+            res.putHeader("Location", UserToken.URL_GOOGLE_AUTH
                     + "client_id=" + UserToken.CLIENT_ID
                     + "&redirect_uri=" + WebServer.encodeUrl(this.getAddress() + DIR_AUTH) // We need to encode because this is a get parameter.
                     + "&response_type=code"

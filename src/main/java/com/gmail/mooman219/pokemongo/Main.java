@@ -9,7 +9,7 @@ import java.net.URI;
 public class Main {
 
     public static void main(String[] args) {
-        WebServer server = new WebServer(8888);
+        WebServer server = new WebServer(8891);
         server.start();
         openWebpage(server.getAddress() + WebServer.DIR_AUTH);
     }

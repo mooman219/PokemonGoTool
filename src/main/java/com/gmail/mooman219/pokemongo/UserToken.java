@@ -24,7 +24,7 @@ public class UserToken {
     /**
      * Google authentication URL for getting the code.
      */
-    public static final String URL_GOOGLE_CODE = "https://accounts.google.com/o/oauth2/auth?";
+    public static final String URL_GOOGLE_AUTH = "https://accounts.google.com/o/oauth2/auth?";
     /**
      * Google authentication URL for getting the token.
      */
