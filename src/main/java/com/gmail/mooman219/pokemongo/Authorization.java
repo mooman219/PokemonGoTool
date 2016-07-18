@@ -125,8 +125,8 @@ public class Authorization {
      * @throws IOException
      */
     private static Map<String, Object> queryAuthenticationApi(byte[] payload) throws IOException {
-        URL myurl = new URL(Main.URL_GOOGLE_TOKEN);
-        HttpsURLConnection con = (HttpsURLConnection) myurl.openConnection();
+        URL url = new URL(Main.URL_GOOGLE_TOKEN);
+        HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
         con.setRequestMethod("POST");
         con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
         con.setRequestProperty("Content-Length", payload.length + "");

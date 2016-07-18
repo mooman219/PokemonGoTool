@@ -1,6 +1,8 @@
 package com.gmail.mooman219.pokemongo;
 
+import java.awt.Desktop;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLEncoder;
 import org.rapidoid.http.Req;
 import org.rapidoid.http.ReqRespHandler;
@@ -45,16 +47,17 @@ public class Main {
     public static final String URL_GOOGLE_TOKEN = "https://accounts.google.com/o/oauth2/token";
 
     public static void main(String[] args) {
+
         // Configure the port.
         On.port(PORT);
-        
+
         // Handle the authentication.
         On.get(DIR_AUTH).plain(new ReqRespHandler() {
             @Override
             public Object execute(Req req, Resp resp) throws Exception {
                 if (req.data().containsKey("code")) {
                     Authorization auth = Authorization.createAutorization((String) req.data().get("code"));
-                    return auth.toString();
+                    return auth != null ? auth.toString() : "Unable to get authentication token.";
                 } else {
                     resp.redirect(URL_GOOGLE_CODE);
                     return "";
@@ -67,7 +70,22 @@ public class Main {
          * else Google will respond with a 400.
          */
         On.post(DIR_AUTH).plain("Post Received");
+
+        // Open the webpage on the client
+        openWebpage(URL_BASE + DIR_AUTH);
     }
+
+    public static void openWebpage(String uri) {
+        Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+        if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+            try {
+                desktop.browse(URI.create(uri));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
     /**
      * Encodes the given value to be used in as a query parameter.
