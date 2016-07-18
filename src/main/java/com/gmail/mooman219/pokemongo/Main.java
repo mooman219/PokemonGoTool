@@ -9,8 +9,9 @@ import java.net.URI;
 public class Main {
 
     public static void main(String[] args) {
-        new WebServer().start();
-        openWebpage(WebServer.URL_BASE + WebServer.DIR_AUTH);
+        WebServer webServer = new WebServer(8888);
+        webServer.start();
+        openWebpage(webServer.getAuthUrl());
     }
 
     /**

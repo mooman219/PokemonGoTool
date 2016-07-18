@@ -14,19 +14,36 @@ import java.net.URLEncoder;
  */
 public class WebServer {
 
-    public static final int PORT = 8888;
-    /**
-     * The base URL for the web server.
-     */
-    public static final String URL_BASE = "http://localhost:" + PORT;
     /**
      * The internal route that handles authentication.
      */
-    public static final String DIR_AUTH = "/auth";
+    private static final String DIR_AUTH = "/auth";
+    /**
+     * The port the web server will run on.
+     */
+    private final int port;
+    /**
+     * The base address of the web server.
+     */
+    private final String address;
     /**
      * The last successful authorization made, null if one hasn't been made yet.
      */
-    private Authorization lastAuth = null;
+    private UserToken lastToken = null;
+
+    /**
+     * Creates a new WebServer.
+     *
+     * @param port the port the web server will run on.
+     */
+    public WebServer(int port) {
+        this.port = port;
+        this.address = "http://localhost:" + port;
+    }
+
+    public String getAuthUrl() {
+        return address + DIR_AUTH;
+    }
 
     /**
      * Gets the last successful authorization made on the web server. This may
@@ -35,8 +52,8 @@ public class WebServer {
      * @return the last successful authorization made, null if one hasn't been
      * made yet.
      */
-    public Authorization getAuthorization() {
-        return lastAuth;
+    public UserToken getAuthToken() {
+        return lastToken;
     }
 
     /**
@@ -47,7 +64,7 @@ public class WebServer {
         HttpServer server = vertx.createHttpServer();
         Router router = Router.router(vertx);
 
-        router.route("/auth").handler(context -> {
+        router.route(DIR_AUTH).handler(context -> {
             HttpServerResponse res = context.response();
             HttpServerRequest req = context.request();
             if (req.method() == HttpMethod.POST) {
@@ -59,22 +76,33 @@ public class WebServer {
                 res.putHeader("content-type", "text/plain");
                 res.end("Post Received");
             } else if (req.params().contains("code")) {
-                Authorization auth = Authorization.createAutorization(req.params().get("code"));
+                /**
+                 * Try to parse the one time use code to create the UserToken.
+                 */
+                UserToken auth = UserToken.createUserToken(req.params().get("code"), this.getAuthUrl());
                 res.putHeader("content-type", "text/html");
                 if (auth != null) {
-                    this.lastAuth = auth;
+                    this.lastToken = auth;
                     res.end("<b>Success</b>, authenticated with the server.\nYou may close this window now.");
                 } else {
-                    res.end("<b>Error</b>, unable to authenticate with the server. <a href=" + URL_BASE + DIR_AUTH + ">Click here to try again.</a>");
+                    res.end("<b>Error</b>, unable to authenticate with the server. <a href=" + this.getAuthUrl() + ">Click here to try again.</a>");
                 }
             } else {
+                /**
+                 * Redirect to the google auth service to generate the one time
+                 * use code needed for the UserToken.
+                 */
                 res.setStatusCode(302);
-                res.putHeader("Location", Authorization.URL_GOOGLE_CODE);
+                res.putHeader("Location", UserToken.URL_GOOGLE_CODE
+                        + "client_id=" + UserToken.CLIENT_ID
+                        + "&redirect_uri=" + WebServer.encode(this.getAuthUrl()) // We need to encode because this is a get parameter.
+                        + "&response_type=code"
+                        + "&scope=openid%20email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email");
                 res.end();
             }
         });
 
-        server.requestHandler(router::accept).listen(PORT);
+        server.requestHandler(router::accept).listen(this.port);
     }
 
     /**

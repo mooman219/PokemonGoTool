@@ -11,7 +11,7 @@ import javax.net.ssl.HttpsURLConnection;
 /**
  * @author Joseph Cumbo (mooman219)
  */
-public class Authorization {
+public class UserToken {
 
     /**
      * Niantic client ID.
@@ -22,15 +22,9 @@ public class Authorization {
      */
     public static final String CLIENT_SECRET = "NCjF1TLi2CcY6t5mt0ZveuL7";
     /**
-     * Google authentication URL for getting the code. The GET query parameters
-     * are pre-populated as they're constant. The {@code redirect_uri} routes to
-     * {@code DIR_AUTH_CODE}.
+     * Google authentication URL for getting the code.
      */
-    public static final String URL_GOOGLE_CODE = "https://accounts.google.com/o/oauth2/auth?"
-            + "client_id=" + CLIENT_ID
-            + "&redirect_uri=" + WebServer.encode(WebServer.URL_BASE + WebServer.DIR_AUTH)
-            + "&response_type=code"
-            + "&scope=openid%20email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email";
+    public static final String URL_GOOGLE_CODE = "https://accounts.google.com/o/oauth2/auth?";
     /**
      * Google authentication URL for getting the token.
      */
@@ -63,7 +57,7 @@ public class Authorization {
     public final String refreshToken;
 
     /**
-     * Represents an authorization response from Google.
+     * Represents an user token response from Google.
      *
      * @param accessToken the token that can be sent to a Google API.
      * @param tokenType identifies the type of token returned. Currently, this
@@ -76,7 +70,7 @@ public class Authorization {
      * token, included by default for installed applications. Refresh tokens are
      * valid until the user revokes access.
      */
-    public Authorization(String accessToken, String tokenType, int expiresIn, String idToken, String refreshToken) {
+    public UserToken(String accessToken, String tokenType, int expiresIn, String idToken, String refreshToken) {
         this.accessToken = accessToken;
         this.tokenType = tokenType;
         this.expiresIn = expiresIn;
@@ -86,29 +80,28 @@ public class Authorization {
 
     @Override
     public String toString() {
-        return "Authorization{" + "accessToken=" + accessToken + ", tokenType=" + tokenType + ", expiresIn=" + expiresIn + ", idToken=" + idToken + ", refreshToken=" + refreshToken + '}';
+        return "UserToken{" + "accessToken=" + accessToken + ", tokenType=" + tokenType + ", expiresIn=" + expiresIn + ", idToken=" + idToken + ", refreshToken=" + refreshToken + '}';
     }
 
     /**
-     * Creates a new Authorization from the refresh token of the current
-     * Authorization. This performs a http request to the authentication
-     * endpoint.
+     * Creates a new UserToken from the refresh token of the current UserToken.
+     * This performs a http request to the authentication endpoint.
      *
-     * @return an Authorization upon success, null if there was an issue with
-     * the code.
+     * @return a UserToken upon success, null if there was an issue with the
+     * code.
      */
-    public Authorization refresh() {
+    public UserToken refresh() {
         byte[] payload = ("grant_type=authorization_code"
                 + "&refresh_token=" + this.refreshToken
                 + "&client_id=" + CLIENT_ID
                 + "&client_secret=" + CLIENT_SECRET).getBytes(StandardCharsets.UTF_8);
 
-        Map<String, Object> res = queryAuthenticationApi(payload);
+        Map<String, Object> res = queryUserTokenApi(payload);
         if (res == null) {
             return null;
         }
 
-        return new Authorization(
+        return new UserToken(
                 (String) res.get("access_token"),
                 (String) res.get("token_type"),
                 (int) res.get("expires_in"),
@@ -117,25 +110,25 @@ public class Authorization {
     }
 
     /**
-     * Creates a new authorization from the given code.
+     * Creates a new UserToken from the given one time use code.
      *
-     * @param code the one time use code used to create an authorization.
-     * @return an Authorization upon success, null if there was an issue with
-     * the code.
+     * @param code the one time use code used to create a UserToken.
+     * @return a UserToken upon success, null if there was an issue with the
+     * code.
      */
-    public static Authorization createAutorization(String code) {
+    public static UserToken createUserToken(String code, String redirectUrl) {
         byte[] payload = ("grant_type=authorization_code"
                 + "&code=" + code
                 + "&client_id=" + CLIENT_ID
                 + "&client_secret=" + CLIENT_SECRET
-                + "&redirect_uri=" + WebServer.URL_BASE + WebServer.DIR_AUTH).getBytes(StandardCharsets.UTF_8);
+                + "&redirect_uri=" + redirectUrl).getBytes(StandardCharsets.UTF_8);
 
-        Map<String, Object> res = queryAuthenticationApi(payload);
+        Map<String, Object> res = queryUserTokenApi(payload);
         if (res == null) {
             return null;
         }
 
-        return new Authorization(
+        return new UserToken(
                 (String) res.get("access_token"),
                 (String) res.get("token_type"),
                 (int) res.get("expires_in"),
@@ -150,7 +143,7 @@ public class Authorization {
      * @return the mapped json response.
      * @throws IOException
      */
-    private static Map<String, Object> queryAuthenticationApi(byte[] payload) {
+    private static Map<String, Object> queryUserTokenApi(byte[] payload) {
         try {
             URL url = new URL(URL_GOOGLE_TOKEN);
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
