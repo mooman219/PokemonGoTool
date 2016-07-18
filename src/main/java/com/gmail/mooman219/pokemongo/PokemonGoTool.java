@@ -1,33 +1,43 @@
 package com.gmail.mooman219.pokemongo;
 
-import java.awt.Desktop;
-import java.net.URI;
+import com.gmail.mooman219.pokemongo.bus.EventBus;
+import com.gmail.mooman219.pokemongo.util.WebUtil;
 
 /**
  * @author Joseph Cumbo (mooman219)
  */
 public class PokemonGoTool {
 
-    public static void main(String[] args) {
-        WebServer server = new WebServer(8891);
-        server.start();
-        openWebpage(server.authenticationHandler.address);
+    private static PokemonGoTool Instance;
+
+    private final WebServer webServer;
+
+    private final EventBus eventBus;
+
+    private PokemonGoTool() {
+        this.webServer = new WebServer(8891);
+        this.eventBus = new EventBus();
     }
 
-    /**
-     * Attempts to open a web page on the platform this is being run on. This
-     * does nothing if it isn't supported on the current platform.
-     *
-     * @param url the url to open.
-     */
-    public static void openWebpage(String url) {
-        Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-        if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
-            try {
-                desktop.browse(URI.create(url));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+    private void start() {
+        webServer.start();
+        WebUtil.openWebpage(webServer.getAuthenticationHandler().getAddress());
+    }
+
+    public WebServer getWebServer() {
+        return webServer;
+    }
+
+    public EventBus getEventBus() {
+        return eventBus;
+    }
+
+    public static void main(String[] args) {
+        PokemonGoTool.Instance = new PokemonGoTool();
+        PokemonGoTool.Instance.start();
+    }
+
+    public static PokemonGoTool getInstance() {
+        return Instance;
     }
 }

@@ -1,4 +1,4 @@
-package com.gmail.mooman219.pokemongo.events;
+package com.gmail.mooman219.pokemongo.event;
 
 import com.gmail.mooman219.pokemongo.UserToken;
 

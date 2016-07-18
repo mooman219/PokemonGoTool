@@ -1,7 +1,7 @@
 package com.gmail.mooman219.pokemongo.handler;
 
 import com.gmail.mooman219.pokemongo.UserToken;
-import com.gmail.mooman219.pokemongo.WebServer;
+import com.gmail.mooman219.pokemongo.util.WebUtil;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
@@ -59,13 +59,13 @@ public class AuthentcationHandler extends RouteHandler {
             /**
              * Try to parse the one time use code to create the UserToken.
              */
-            UserToken auth = UserToken.createUserToken(req.params().get("code"), this.address);
+            UserToken auth = UserToken.createUserToken(req.params().get("code"), this.getAddress());
             res.putHeader("content-type", "text/html");
             if (auth != null) {
                 this.lastToken = auth;
                 res.end("<b>Success</b>, authenticated with the server.\nYou may close this window now.");
             } else {
-                res.end("<b>Error</b>, unable to authenticate with the server. <a href=" + this.address + ">Click here to try again.</a>");
+                res.end("<b>Error</b>, unable to authenticate with the server. <a href=" + this.getAddress() + ">Click here to try again.</a>");
             }
         } else {
             /**
@@ -75,7 +75,7 @@ public class AuthentcationHandler extends RouteHandler {
             res.setStatusCode(302);
             res.putHeader("Location", UserToken.URL_GOOGLE_AUTH
                     + "client_id=" + UserToken.CLIENT_ID
-                    + "&redirect_uri=" + WebServer.encodeUrl(this.address) // We need to encode because this is a get parameter.
+                    + "&redirect_uri=" + WebUtil.encodeUrl(this.getAddress()) // We need to encode because this is a get parameter.
                     + "&response_type=code"
                     + "&scope=openid%20email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email");
             res.end();

@@ -12,12 +12,12 @@ public abstract class RouteHandler implements Handler<RoutingContext> {
     /**
      * The fully qualified address with the route included.
      */
-    public final String address;
+    private final String address;
 
     /**
      * The route this handler lives.
      */
-    public final String route;
+    private final String route;
 
     /**
      * Creates a new AuthentcationHandler.
@@ -30,6 +30,19 @@ public abstract class RouteHandler implements Handler<RoutingContext> {
         this.route = route;
     }
 
+    public String getAddress() {
+        return address;
+    }
+
+    public String getRoute() {
+        return route;
+    }
+
+    /**
+     * Registers this handler with the given router.
+     *
+     * @param router the router to register with.
+     */
     public void register(Router router) {
         router.route(this.route).handler(this);
     }

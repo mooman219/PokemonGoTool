@@ -33,28 +33,28 @@ public class UserToken {
     /**
      * The token that can be sent to a Google API.
      */
-    public final String accessToken;
+    private final String accessToken;
     /**
      * Identifies the type of token returned. Currently, this field always has
      * the value Bearer.
      */
-    public final String tokenType;
+    private final String tokenType;
     /**
      * The remaining lifetime of the access token.
      */
-    public final int expiresIn;
+    private final int expiresIn;
     /**
      * A JWT that contains identity information about the user that is digitally
      * signed by Google. If your request included an identity scope such as
      * openid, profile, or email.
      */
-    public final String idToken;
+    private final String idToken;
     /**
      * A token that may be used to obtain a new access token, included by
      * default for installed applications. Refresh tokens are valid until the
      * user revokes access.
      */
-    public final String refreshToken;
+    private final String refreshToken;
 
     /**
      * Represents an user token response from Google.
@@ -76,6 +76,26 @@ public class UserToken {
         this.expiresIn = expiresIn;
         this.idToken = idToken;
         this.refreshToken = refreshToken;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public String getTokenType() {
+        return tokenType;
+    }
+
+    public int getExpiresIn() {
+        return expiresIn;
+    }
+
+    public String getIdToken() {
+        return idToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
     }
 
     @Override
