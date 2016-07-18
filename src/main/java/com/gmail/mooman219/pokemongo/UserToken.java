@@ -113,6 +113,7 @@ public class UserToken {
      * Creates a new UserToken from the given one time use code.
      *
      * @param code the one time use code used to create a UserToken.
+     * @param redirectUrl the url that's redirected to upon completion.
      * @return a UserToken upon success, null if there was an issue with the
      * code.
      */
