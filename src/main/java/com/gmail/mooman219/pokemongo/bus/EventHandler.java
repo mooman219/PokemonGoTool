@@ -1,4 +1,4 @@
-package com.gmail.mooman219.pokemongo.event;
+package com.gmail.mooman219.pokemongo.bus;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,4 +1,4 @@
-package com.gmail.mooman219.pokemongo.event;
+package com.gmail.mooman219.pokemongo.bus;
 
 /**
  * Importance of the {@link EventHandler}. When executing an Event, the handlers
