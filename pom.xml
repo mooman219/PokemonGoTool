@@ -18,7 +18,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.gmail.mooman219.pokemongo.Main</mainClass>
+                            <mainClass>com.gmail.mooman219.pokemongo.PokemonGoTool</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

@@ -6,7 +6,7 @@ import java.net.URI;
 /**
  * @author Joseph Cumbo (mooman219)
  */
-public class Main {
+public class PokemonGoTool {
 
     public static void main(String[] args) {
         WebServer server = new WebServer(8891);
