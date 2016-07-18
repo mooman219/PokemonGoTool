@@ -70,7 +70,7 @@ public class UserToken {
      * token, included by default for installed applications. Refresh tokens are
      * valid until the user revokes access.
      */
-    public UserToken(String accessToken, String tokenType, int expiresIn, String idToken, String refreshToken) {
+    private UserToken(String accessToken, String tokenType, int expiresIn, String idToken, String refreshToken) {
         this.accessToken = accessToken;
         this.tokenType = tokenType;
         this.expiresIn = expiresIn;

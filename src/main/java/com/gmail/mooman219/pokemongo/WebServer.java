@@ -1,12 +1,9 @@
 package com.gmail.mooman219.pokemongo;
 
+import com.gmail.mooman219.pokemongo.net.AuthentcationHandler;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.RoutingContext;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
@@ -16,10 +13,6 @@ import java.net.URLEncoder;
 public class WebServer {
 
     /**
-     * The internal route that handles authentication.
-     */
-    public static final String DIR_AUTH = "/auth";
-    /**
      * The port the web server will run on.
      */
     private final int port;
@@ -27,10 +20,8 @@ public class WebServer {
      * The base address of the web server.
      */
     private final String address;
-    /**
-     * The last successful authorization made, null if one hasn't been made yet.
-     */
-    private UserToken lastToken = null;
+
+    private final AuthentcationHandler authenticationHandler;
 
     /**
      * Creates a new WebServer.
@@ -40,6 +31,7 @@ public class WebServer {
     public WebServer(int port) {
         this.port = port;
         this.address = "http://localhost:" + port;
+        this.authenticationHandler = new AuthentcationHandler(this.address, "/auth");
     }
 
     /**
@@ -60,15 +52,8 @@ public class WebServer {
         return address;
     }
 
-    /**
-     * Gets the last successful authorization made on the web server. This may
-     * be null if a successful authorization hasn't been made yet.
-     *
-     * @return the last successful authorization made, null if one hasn't been
-     * made yet.
-     */
-    public UserToken getLastToken() {
-        return lastToken;
+    public AuthentcationHandler getAuthenticationHandler() {
+        return authenticationHandler;
     }
 
     /**
@@ -79,52 +64,9 @@ public class WebServer {
         HttpServer server = vertx.createHttpServer();
         Router router = Router.router(vertx);
 
-        router.route(DIR_AUTH).handler(this::handleAuth);
+        router.route(this.authenticationHandler.getRoute()).handler(this.authenticationHandler);
 
         server.requestHandler(router::accept).listen(this.port);
-    }
-
-    /**
-     * Handles authentication for the server.
-     *
-     * @param context the routing context.
-     */
-    private void handleAuth(RoutingContext context) {
-        HttpServerResponse res = context.response();
-        HttpServerRequest req = context.request();
-        if (req.method() == HttpMethod.POST) {
-            /**
-             * When the token request is made, the redirect-uri needs to be
-             * valid or else Google will respond with a 400. Therefore, we
-             * handle the post case differently.
-             */
-            res.putHeader("content-type", "text/plain");
-            res.end("Post Received");
-        } else if (req.params().contains("code")) {
-            /**
-             * Try to parse the one time use code to create the UserToken.
-             */
-            UserToken auth = UserToken.createUserToken(req.params().get("code"), this.getAddress() + DIR_AUTH);
-            res.putHeader("content-type", "text/html");
-            if (auth != null) {
-                this.lastToken = auth;
-                res.end("<b>Success</b>, authenticated with the server.\nYou may close this window now.");
-            } else {
-                res.end("<b>Error</b>, unable to authenticate with the server. <a href=" + this.getAddress() + DIR_AUTH + ">Click here to try again.</a>");
-            }
-        } else {
-            /**
-             * Redirect to the google auth service to generate the one time use
-             * code needed for the UserToken.
-             */
-            res.setStatusCode(302);
-            res.putHeader("Location", UserToken.URL_GOOGLE_AUTH
-                    + "client_id=" + UserToken.CLIENT_ID
-                    + "&redirect_uri=" + WebServer.encodeUrl(this.getAddress() + DIR_AUTH) // We need to encode because this is a get parameter.
-                    + "&response_type=code"
-                    + "&scope=openid%20email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email");
-            res.end();
-        }
     }
 
     /**
